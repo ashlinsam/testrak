@@ -1,7 +1,7 @@
 # Record 03. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 03
-song: 
-artist: 
+friend: Mukund
+song: Local Boys
+artist: Dhanush, Sivakarthikeyan
 
 # Optional
 sign-off: 
