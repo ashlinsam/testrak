@@ -1,7 +1,7 @@
 # Record 08. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 08
-song: 
-artist: 
+friend: Mukund
+song: CHENNAI CITY GANGSTA
+artist: Shiva, Priya
 
 # Optional
 sign-off: 
