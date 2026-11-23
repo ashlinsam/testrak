@@ -22,6 +22,6 @@ placeholder-tone: on
 # off = every record is open (handy while testing)
 card-unlock: on
 # Any made-up phrase. It decides each card's secret link. Set it once, before writing the cards.
-card-secret: change-me
+card-secret: ashlintest
 # Your live address, used to build the links in card-links.txt
-site-address: https://YOUR-SITE.onrender.com
+site-address: https://testrak.onrender.com
