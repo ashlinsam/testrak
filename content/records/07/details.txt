@@ -1,7 +1,7 @@
 # Record 07. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 07
-song: 
-artist: 
+friend: Deepti
+song: Radhimaa
+artist: Sai Abhyankkar
 
 # Optional
 sign-off: 
