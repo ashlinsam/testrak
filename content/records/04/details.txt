@@ -1,7 +1,7 @@
 # Record 04. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 04
-song: 
-artist: 
+friend: Shavin
+song: Vettaikaaran
+artist: Vijay, Anushka Shetty, Vijay Antony
 
 # Optional
 sign-off: 
