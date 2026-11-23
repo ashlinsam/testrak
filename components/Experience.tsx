@@ -64,6 +64,23 @@ export function Experience() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  
+  /* -------------------- NFC cards: ?record=02 opens that record directly -------------------- */
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const wanted = Number(url.searchParams.get("record"));
+    const record = records.find((r) => r.recordNumber === wanted);
+    if (!record) return;
+    // Tidy the address (so a refresh doesn't reopen it), then open the record on top of the shelf,
+    // so "Back to the shelf" and the phone's back gesture both land on the collection.
+    url.searchParams.delete("record");
+    safeHistory.replace(null, url.pathname + url.search);
+    safeHistory.push("record", `#${record.id}`);
+    setView("collection");
+    setSelectedId(record.id);
+  }, []);
+  
+
   const pushLayer = (layer: Layer, hash: string) => {
     if (safeHistory.layer()) safeHistory.replace(layer, hash);
     else safeHistory.push(layer, hash);
