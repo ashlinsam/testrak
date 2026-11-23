@@ -1,7 +1,7 @@
 # Record 06. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 06
-song: 
-artist: 
+friend: Gouri
+song: Fevicol Se
+artist: Kareena Kapoor, Salmaan Khan
 
 # Optional
 sign-off: 
