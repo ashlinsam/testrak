@@ -25,7 +25,7 @@ export function Landing({
 }) {
   const progress = useProgress();
   const [leaving, setLeaving] = useState(false);
-  const returning = progress.exploredCount > 0;
+  const returning = progress.exploredCount > 0 || progress.opened.length > 0;
 
   const line = (i: number) => ({
     initial: { opacity: 0, y: 14, filter: "blur(10px)" },

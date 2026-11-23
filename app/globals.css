@@ -271,6 +271,17 @@ body {
   transform: translateY(-14%);
 }
 
+/* sealed sleeves: brown parcel paper */
+.kraft {
+  background-color: #a9835a;
+  background-image: var(--fibres), radial-gradient(120% 90% at 30% 15%, rgba(255, 235, 200, 0.22), transparent 60%),
+    linear-gradient(160deg, rgba(0, 0, 0, 0) 40%, rgba(60, 35, 15, 0.25));
+}
+.sleeve-btn.is-sealed { cursor: default; }
+@media (hover: hover) {
+  .sleeve-btn.is-sealed:hover .sleeve-lift { transform: translateY(-3px); }
+}
+
 /* masking tape */
 .tape {
   background-color: rgba(232, 221, 196, 0.94);

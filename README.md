@@ -61,6 +61,36 @@ photo-description:
 
 ---
 
+## NFC cards: sealed records
+
+Each record can stay **sealed** (wrapped in brown paper on the shelf) until he taps its NFC card. Tapping a card opens that record, takes him to the shelf, and the wrapping comes off in front of him. From there he takes it off the shelf and plays it. The last note still unlocks once he's played all 24.
+
+On his very first visit, a card tap shows the "Unwrap your gift" opening first, then the shelf. After that, cards go straight to the shelf.
+
+**Set up** in `content/settings.txt`:
+
+```
+card-unlock: on                                   # off = every record open (handy while testing)
+card-secret: any made-up phrase                   # decides every card's secret link
+site-address: https://your-site.onrender.com      # your live address
+```
+
+Every build writes **`card-links.txt`** with the link for each card, for example:
+
+```
+02  Anna Linson    https://your-site.onrender.com/?card=b58bzf
+```
+
+Each link has a secret code, so he can't open other records by guessing addresses.
+
+**Writing a card** (free NFC Tools app, iPhone or Android): **Write → Add a record → URL**, paste the card's link, tap **Write**, and hold the top of your phone to the card.
+
+- **Set `card-secret` and `site-address` before writing any cards.** Changing either one changes every link, and you'd have to rewrite the cards.
+- **Don't lock the cards** in NFC Tools until everything is final. Locking can't be undone.
+- **Test the link first:** open it in your phone's browser before writing it to a card.
+- **Bring progress back:** progress is saved in his phone's browser. If he clears it, or opens the site on another phone, tapping each card again re-opens its record.
+- **Testing:** `/?unlock` opens every record, and `/?reset` seals them all again.
+
 ## Run it on your computer
 
 You need [Node.js](https://nodejs.org) 20.9 or newer.
@@ -76,8 +106,9 @@ Handy addresses while testing:
 
 | Address | What it does |
 | --- | --- |
-| `/?unlock` | Marks every record as played, so you can see the last note |
-| `/?reset`  | Clears saved progress |
+| `/?unlock` | Opens and marks every record as played, so you can see the last note |
+| `/?reset`  | Clears saved progress (seals every record again) |
+| `/?card=…` | What an NFC card opens (links are in `card-links.txt`) |
 
 ---
 

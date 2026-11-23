@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { usePrefersReducedMotion } from "@/lib/useReducedMotion";
 import type { RecordEntry } from "@/data/types";
 import { identityFor, pad2 } from "@/lib/identity";
 import { Sleeve } from "@/components/ui/Sleeve";
@@ -13,6 +14,9 @@ export type ShelfHandle = { scrollToIndex: (i: number, smooth?: boolean) => void
 type Props = {
   records: RecordEntry[];
   isExplored: (id: string) => boolean;
+  isSealed: (id: string) => boolean;
+  /** A record whose card was just tapped: its wrapping comes off on screen. */
+  justOpenedId: string | null;
   exploredCount: number;
   isUnlocked: boolean;
   onSelect: (record: RecordEntry) => void;
@@ -21,7 +25,7 @@ type Props = {
 };
 
 export const Shelf = forwardRef<ShelfHandle, Props>(function Shelf(
-  { records, isExplored, exploredCount, isUnlocked, onSelect, onOpenFinale, onActiveChange },
+  { records, isExplored, isSealed, justOpenedId, exploredCount, isUnlocked, onSelect, onOpenFinale, onActiveChange },
   ref,
 ) {
   const scroller = useRef<HTMLDivElement>(null);
@@ -94,6 +98,8 @@ export const Shelf = forwardRef<ShelfHandle, Props>(function Shelf(
               index={i}
               active={i === active}
               explored={isExplored(record.id)}
+              sealed={isSealed(record.id)}
+              justOpened={record.id === justOpenedId}
               onSelect={onSelect}
             />
           ))}
@@ -136,56 +142,99 @@ function ShelfItem({
   index,
   active,
   explored,
+  sealed,
+  justOpened,
   onSelect,
 }: {
   record: RecordEntry;
   index: number;
   active: boolean;
   explored: boolean;
+  sealed: boolean;
+  justOpened: boolean;
   onSelect: (r: RecordEntry) => void;
 }) {
   const id = identityFor(record);
+  const reduced = usePrefersReducedMotion();
+  const [nudge, setNudge] = useState(0);
+  const num = pad2(record.recordNumber);
+
   return (
     <motion.li
       data-shelf-item
-      data-active={active}
+      data-active={active && !sealed}
       className="relative w-[var(--sleeve)] shrink-0 snap-center lg:snap-start"
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.9, delay: 0.25 + Math.min(index, 8) * 0.06, ease: [0.22, 1, 0.36, 1] }}
     >
-      <button
+      <motion.button
         type="button"
-        onClick={() => onSelect(record)}
+        onClick={() => (sealed ? setNudge((n) => n + 1) : onSelect(record))}
         data-record-button={record.id}
-        aria-label={`Record ${record.recordNumber}, chosen by ${record.friendName}${explored ? `: ${record.songTitle} by ${record.artistName}, played` : ""}. Take it off the shelf.`}
-        className="sleeve-btn group block w-full text-left outline-none"
+        aria-disabled={sealed || undefined}
+        aria-label={
+          sealed
+            ? `Record ${record.recordNumber}, sealed. Tap its card to open it.`
+            : `Record ${record.recordNumber}, chosen by ${record.friendName}${explored ? `: ${record.songTitle} by ${record.artistName}, played` : ""}. Take it off the shelf.`
+        }
+        className={`sleeve-btn group block w-full text-left outline-none ${sealed ? "is-sealed" : ""}`}
+        key={nudge}
+        animate={nudge && !reduced ? { x: [0, -7, 6, -4, 2, 0] } : undefined}
+        transition={{ duration: 0.45 }}
       >
         <div className="sleeve-lift relative" style={{ rotate: `${id.tilt * 0.6}deg` }}>
           {/* the record, tucked inside — peeks out when you reach for it */}
-          <div className="sleeve-peek absolute inset-[4%]">
-            <Vinyl label={labelFromRecord(record)} sheen={false} />
-          </div>
-          <Sleeve record={record} className="relative shadow-[0_2px_3px_rgba(0,0,0,.35),0_16px_28px_-14px_rgba(0,0,0,.8)]" />
+          {!sealed && (
+            <div className="sleeve-peek absolute inset-[4%]">
+              <Vinyl label={labelFromRecord(record)} sheen={false} />
+            </div>
+          )}
+          {sealed ? (
+            <SealedSleeve number={num} />
+          ) : (
+            <div className="relative">
+              <Sleeve record={record} className="relative shadow-[0_2px_3px_rgba(0,0,0,.35),0_16px_28px_-14px_rgba(0,0,0,.8)]" />
+              {/* the card was just tapped: the wrapping comes off */}
+              {justOpened && (
+                <motion.div
+                  className="pointer-events-none absolute inset-0"
+                  initial={{ opacity: 1, y: "0%", rotate: 0 }}
+                  animate={reduced ? { opacity: 0 } : { opacity: [1, 1, 0], y: ["0%", "-8%", "-70%"], rotate: [0, -2, -9] }}
+                  transition={{ duration: reduced ? 0.6 : 1.5, delay: 0.9, ease: [0.45, 0, 0.2, 1] }}
+                >
+                  <SealedSleeve number={num} />
+                </motion.div>
+              )}
+            </div>
+          )}
           <span className="sleeve-focus pointer-events-none absolute -inset-1.5 rounded-[4px]" />
         </div>
-      </button>
+      </motion.button>
 
-      {/* masking-tape label on the shelf edge */}
+      {/* masking-tape label on the shelf edge: the name appears once it's open */}
       <div className="relative z-10 flex h-[2.6rem] items-center justify-center">
-        <span
-          className="tape text-ink relative px-4 pt-0.5 pb-1 leading-none"
-          style={{ rotate: `${id.tilt * -1.2}deg` }}
-        >
-          <span className="font-spine mr-2 align-middle text-[0.7rem] font-semibold tracking-wider text-ink-soft">
-            {pad2(record.recordNumber)}
-          </span>
-          <span className={`${id.hand} align-middle text-[length:calc(1.35rem*var(--hand,1))]`}>{record.friendName}</span>
+        <span className="tape text-ink relative px-4 pt-0.5 pb-1 leading-none" style={{ rotate: `${id.tilt * -1.2}deg` }}>
+          <span className="font-spine mr-2 align-middle text-[0.7rem] font-semibold tracking-wider text-ink-soft">{num}</span>
+          {sealed ? (
+            <span className="hand-a align-middle text-[1.35rem] text-ink/60">sealed</span>
+          ) : (
+            <motion.span
+              className={`${id.hand} align-middle text-[length:calc(1.35rem*var(--hand,1))]`}
+              initial={justOpened ? { opacity: 0 } : false}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: justOpened ? 1.8 : 0 }}
+            >
+              {record.friendName}
+            </motion.span>
+          )}
         </span>
       </div>
 
-      <div className="mt-3 min-h-10 px-1 text-center">
-        {explored ? (
+      <div className="mt-3 min-h-10 px-1 text-center" aria-live="polite">
+        {sealed ? (
+          nudge > 0 ? <p className="text-[0.8rem] leading-snug text-amber-soft">Tap its card to open this one.</p> : null
+        ) : explored ? (
           <p className="text-[0.8rem] leading-snug text-mist">
             <span className="mr-1.5 inline-block h-1.5 w-1.5 -translate-y-px rounded-full bg-amber align-middle" aria-hidden />
             <span className="font-display italic" style={{ fontVariationSettings: '"opsz" 14, "SOFT" 100' }}>
@@ -195,5 +244,23 @@ function ShelfItem({
         ) : null}
       </div>
     </motion.li>
+  );
+}
+
+/** A sleeve still wrapped in brown paper and twine, sealed with its number. */
+function SealedSleeve({ number }: { number: string }) {
+  return (
+    <div className="kraft relative aspect-square overflow-hidden rounded-[2px] shadow-[0_2px_3px_rgba(0,0,0,.35),0_16px_28px_-14px_rgba(0,0,0,.8)]">
+      {/* twine */}
+      <div className="absolute inset-y-0 left-[62%] w-[3px] bg-[#e9dcc2]/70 shadow-[0_0_0_1px_rgba(90,60,30,.25)]" />
+      <div className="absolute inset-x-0 top-[38%] h-[3px] bg-[#e9dcc2]/70 shadow-[0_0_0_1px_rgba(90,60,30,.25)]" />
+      {/* wax seal where the twine crosses */}
+      <div className="absolute top-[38%] left-[62%] grid h-[24%] w-[24%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-burgundy shadow-[inset_0_2px_4px_rgba(255,255,255,.18),inset_0_-3px_6px_rgba(0,0,0,.35),0_3px_6px_rgba(0,0,0,.3)]">
+        <span className="font-display text-[clamp(1rem,2.2vw,1.5rem)] text-paper/90" style={{ fontVariationSettings: '"opsz" 72, "SOFT" 100' }}>
+          {number}
+        </span>
+      </div>
+      <p className="hand-a absolute bottom-[9%] left-[9%] text-[1.35rem] text-ink/70">tap the card</p>
+    </div>
   );
 }

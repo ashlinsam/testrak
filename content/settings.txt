@@ -16,3 +16,12 @@ note-heading-3: A little note from
 
 # "on" plays a soft tone for records with no song yet. Set to off before you send him the link.
 placeholder-tone: on
+
+# ---- NFC cards ----
+# on  = every record starts sealed and opens when its card is tapped
+# off = every record is open (handy while testing)
+card-unlock: on
+# Any made-up phrase. It decides each card's secret link. Set it once, before writing the cards.
+card-secret: change-me
+# Your live address, used to build the links in card-links.txt
+site-address: https://YOUR-SITE.onrender.com

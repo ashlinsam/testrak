@@ -6,6 +6,7 @@ import type { RecordEntry } from "@/data/types";
 import { records, TOTAL_RECORDS } from "@/data/records";
 import { pad2 } from "@/lib/identity";
 import { useProgress } from "@/lib/progress";
+import { site } from "@/data/site";
 import { Shelf, type ShelfHandle } from "./Shelf";
 import { Tracklist } from "./Tracklist";
 
@@ -13,12 +14,18 @@ export function Collection({
   onSelect,
   onOpenFinale,
   focusRecordId,
+  tapped,
+  onDismissTapped,
 }: {
   onSelect: (record: RecordEntry) => void;
   onOpenFinale: () => void;
   /** After closing the player, bring this sleeve back into view. */
   focusRecordId: string | null;
+  /** The record whose NFC card was just tapped. */
+  tapped: { id: string; fresh: boolean } | null;
+  onDismissTapped: () => void;
 }) {
+  const tappedRecord = tapped ? records.find((r) => r.id === tapped.id) ?? null : null;
   const progress = useProgress();
   const shelf = useRef<ShelfHandle>(null);
   const [active, setActive] = useState(0);
@@ -81,9 +88,53 @@ export function Collection({
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, delay: 0.5 }}
         >
-          Take one off the shelf. Inside each sleeve is a song and a note from the person who picked it for you.
+          {site.cardUnlock
+            ? "Every sleeve is sealed until you tap its card. Inside each one is a song and a note from the person who picked it for you."
+            : "Take one off the shelf. Inside each sleeve is a song and a note from the person who picked it for you."}
         </motion.p>
+        {site.cardUnlock && (
+          <p className="font-spine mt-3 text-sm tracking-wide text-mist/75">
+            {progress.openedCount} of {TOTAL_RECORDS} open
+          </p>
+        )}
       </section>
+
+      <AnimatePresence>
+        {tappedRecord && (
+          <motion.div
+            key={`tapped-${tappedRecord.id}`}
+            role="status"
+            className="mx-auto mt-8 max-w-6xl px-6 sm:px-10 lg:px-16"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-[3px] border border-amber/30 bg-amber/[0.07] px-5 py-4">
+              <p className="font-display text-lg text-paper" style={{ fontVariationSettings: '"opsz" 24, "SOFT" 100' }}>
+                {tapped?.fresh
+                  ? `Record ${pad2(tappedRecord.recordNumber)} is open. It's from ${tappedRecord.friendName}.`
+                  : `Record ${pad2(tappedRecord.recordNumber)} from ${tappedRecord.friendName} was already open.`}
+              </p>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDismissTapped();
+                    onSelect(tappedRecord);
+                  }}
+                  className="rounded-full bg-amber px-5 py-2.5 text-sm font-medium text-night transition-colors hover:bg-amber-soft"
+                >
+                  Play it
+                </button>
+                <button type="button" onClick={onDismissTapped} className="text-sm text-mist underline-offset-4 hover:text-paper hover:underline">
+                  Later
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {progress.isUnlocked && !progress.finaleSeen && (
@@ -115,6 +166,8 @@ export function Collection({
           ref={shelf}
           records={records}
           isExplored={progress.isExplored}
+          isSealed={progress.isSealed}
+          justOpenedId={tapped?.fresh ? tapped.id : null}
           exploredCount={progress.exploredCount}
           isUnlocked={progress.isUnlocked}
           onSelect={onSelect}
@@ -133,6 +186,7 @@ export function Collection({
         open={tracklistOpen}
         onClose={() => setTracklistOpen(false)}
         isExplored={progress.isExplored}
+        isSealed={progress.isSealed}
         onSelect={(r) => {
           setTracklistOpen(false);
           onSelect(r);

@@ -31,4 +31,6 @@ export type RecordEntry = {
 
   /** The song file. Played first if present. */
   optionalAudioSource?: string;
+  /** Secret code in this record's NFC card link (?card=…). Generated, never edited by hand. */
+  cardCode?: string;
 };

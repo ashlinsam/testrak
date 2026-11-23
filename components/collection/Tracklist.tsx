@@ -16,11 +16,13 @@ export function Tracklist({
   onClose,
   onSelect,
   isExplored,
+  isSealed,
 }: {
   open: boolean;
   onClose: () => void;
   onSelect: (r: RecordEntry) => void;
   isExplored: (id: string) => boolean;
+  isSealed: (id: string) => boolean;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -87,18 +89,26 @@ export function Tracklist({
                   <ol>
                     {side.map((r) => {
                       const played = isExplored(r.id);
+                      const sealed = isSealed(r.id);
                       return (
                         <li key={r.id} className="border-b border-ink/10">
                           <button
                             type="button"
-                            onClick={() => onSelect(r)}
-                            className="grid w-full grid-cols-[2rem_1fr] items-baseline gap-x-2 py-2.5 text-left transition-colors hover:bg-ink/[0.04]"
+                            onClick={() => !sealed && onSelect(r)}
+                            aria-disabled={sealed || undefined}
+                            className={`grid w-full grid-cols-[2rem_1fr] items-baseline gap-x-2 py-2.5 text-left transition-colors ${sealed ? "cursor-default" : "hover:bg-ink/[0.04]"}`}
                           >
                             <span className="font-spine text-xs font-semibold text-ink-soft tabular-nums">{pad2(r.recordNumber)}</span>
                             <span className="min-w-0">
-                              <span className={`${identityFor(r).hand} block text-[length:calc(1.3rem*var(--hand,1))] leading-tight text-ink`}>{r.friendName}</span>
+                              {sealed ? (
+                                <span className="hand-a block text-[1.3rem] leading-tight text-ink/45">Sealed</span>
+                              ) : (
+                                <span className={`${identityFor(r).hand} block text-[length:calc(1.3rem*var(--hand,1))] leading-tight text-ink`}>{r.friendName}</span>
+                              )}
                               <span className="block truncate text-[0.82rem] text-ink-soft">
-                                {played ? (
+                                {sealed ? (
+                                  <span className="italic opacity-70">Opens when you tap its card</span>
+                                ) : played ? (
                                   <>
                                     {r.songTitle} <span className="text-ink-soft/70">by {r.artistName}</span>
                                   </>

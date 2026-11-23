@@ -1,10 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { records } from "@/data/records";
 import type { RecordEntry } from "@/data/types";
 import { usePrefersReducedMotion } from "@/lib/useReducedMotion";
+import { getProgress, progressActions, useProgress } from "@/lib/progress";
 import { Landing } from "./landing/Landing";
 import { Collection } from "./collection/Collection";
 import { PlayerScene } from "./player/PlayerScene";
@@ -45,10 +46,16 @@ export function Experience() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [finaleOpen, setFinaleOpen] = useState(false);
   const [returnTo, setReturnTo] = useState<string | null>(null);
+  /** The record whose card was just tapped; fresh = it was sealed until now. */
+  const [tapped, setTapped] = useState<{ id: string; fresh: boolean } | null>(null);
+  const progress = useProgress();
 
   const index = selectedId ? records.findIndex((r) => r.id === selectedId) : -1;
   const selected = index >= 0 ? records[index] : null;
   const overlayOpen = Boolean(selected) || finaleOpen;
+  // Previous / next skip records that are still sealed.
+  const prevOpen = index > 0 ? [...records.slice(0, index)].reverse().find((r) => !progress.isSealed(r.id)) : undefined;
+  const nextOpen = index >= 0 ? records.slice(index + 1).find((r) => !progress.isSealed(r.id)) : undefined;
 
   /* -------------------- history: back gesture closes overlays -------------------- */
   useEffect(() => {
@@ -64,22 +71,25 @@ export function Experience() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  
-  /* -------------------- NFC cards: ?record=02 opens that record directly -------------------- */
+  /* -------------------- NFC cards: ?card=CODE opens that record, then shows the shelf -------------------- */
+  // (#card-CODE works too, for previews that can't pass a query string. Read it before the hash is tidied away.)
+  const initialHash = useRef(typeof window === "undefined" ? "" : window.location.hash);
   useEffect(() => {
     const url = new URL(window.location.href);
-    const wanted = Number(url.searchParams.get("record"));
-    const record = records.find((r) => r.recordNumber === wanted);
+    const code = url.searchParams.get("card") ?? initialHash.current.match(/^#card-([a-z0-9]+)$/i)?.[1] ?? null;
+    if (!code) return;
+    url.searchParams.delete("card");
+    safeHistory.replace(null, url.pathname + url.search); // tidy the address so a refresh doesn't re-trigger it
+    const record = records.find((r) => r.cardCode === code.trim().toLowerCase());
     if (!record) return;
-    // Tidy the address (so a refresh doesn't reopen it), then open the record on top of the shelf,
-    // so "Back to the shelf" and the phone's back gesture both land on the collection.
-    url.searchParams.delete("record");
-    safeHistory.replace(null, url.pathname + url.search);
-    safeHistory.push("record", `#${record.id}`);
-    setView("collection");
-    setSelectedId(record.id);
+    const before = getProgress();
+    const firstVisit = before.opened.length === 0 && before.explored.length === 0;
+    const fresh = progressActions.open(record.id);
+    setTapped({ id: record.id, fresh });
+    setReturnTo(record.id);
+    // The very first visit still gets the "Unwrap your gift" opening; after that, cards go straight to the shelf.
+    if (!firstVisit) setView("collection");
   }, []);
-  
 
   const pushLayer = (layer: Layer, hash: string) => {
     if (safeHistory.layer()) safeHistory.replace(layer, hash);
@@ -111,6 +121,7 @@ export function Experience() {
   }, [returnTo, selected]);
 
   const openRecord = (r: RecordEntry) => {
+    if (progress.isSealed(r.id)) return;
     pushLayer("record", `#${r.id}`);
     setSelectedId(r.id);
   };
@@ -142,7 +153,14 @@ export function Experience() {
           {view === "landing" ? (
             <Landing key="landing" onUnwrap={unwrap} onOpenFinale={openFinale} />
           ) : (
-            <Collection key="collection" onSelect={openRecord} onOpenFinale={openFinale} focusRecordId={returnTo} />
+            <Collection
+              key="collection"
+              onSelect={openRecord}
+              onOpenFinale={openFinale}
+              focusRecordId={returnTo}
+              tapped={tapped}
+              onDismissTapped={() => setTapped(null)}
+            />
           )}
         </AnimatePresence>
       </div>
@@ -178,8 +196,8 @@ export function Experience() {
             record={selected}
             total={records.length}
             onClose={popLayer}
-            onPrev={index > 0 ? () => switchRecord(records[index - 1]) : null}
-            onNext={index < records.length - 1 ? () => switchRecord(records[index + 1]) : null}
+            onPrev={prevOpen ? () => switchRecord(prevOpen) : null}
+            onNext={nextOpen ? () => switchRecord(nextOpen) : null}
           />
         )}
       </AnimatePresence>
