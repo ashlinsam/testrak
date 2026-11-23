@@ -1,7 +1,7 @@
 # Record 10. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 10
-song: 
-artist: 
+friend: Dave
+song: Why this Koleveri
+artist: Anirudh
 
 # Optional
 sign-off: 
