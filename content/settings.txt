@@ -1,0 +1,18 @@
+# Site-wide words. Format is  key: value  (one per line).
+# Lines starting with # are notes and are ignored.
+
+his-name: [His name]
+
+opening-line-1: 24 years.
+opening-line-2: 24 songs.
+opening-line-3: 24 little pieces of you.
+opening-subline: Some people are easier to celebrate with music.
+unwrap-button: Unwrap your gift
+
+# The handwritten heading on each note rotates through these
+note-heading-1: Why I picked this for you
+note-heading-2: This one reminds me of…
+note-heading-3: A little note from
+
+# "on" plays a soft tone for records with no song yet. Set to off before you send him the link.
+placeholder-tone: on

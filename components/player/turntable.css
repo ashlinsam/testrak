@@ -1,0 +1,320 @@
+/* ------------------------------------------------------------------
+   Turntable
+   Everything is measured in --u (1% of the deck's width), so the deck
+   scales as one object from an iPhone to a big monitor.
+
+   Stages:  arriving → drawing → placing → cued
+     arriving  the sleeve is held over the deck, record inside
+     drawing   the record slides part-way out of the sleeve
+     placing   the record settles on the platter, the sleeve is set aside
+     cued      tonearm swings across, ready for the needle
+------------------------------------------------------------------- */
+
+.tt {
+  --u: calc(var(--tt) / 100);
+  position: relative;
+  width: var(--tt);
+  height: calc(var(--u) * 80);
+}
+
+/* plinth: walnut case + brushed charcoal top plate */
+.tt-plinth {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(var(--u) * 1.8);
+  box-shadow:
+    0 calc(var(--u) * 3) calc(var(--u) * 6) -1px rgba(0, 0, 0, 0.65),
+    0 1px 0 rgba(255, 220, 170, 0.12) inset;
+}
+.tt-plate {
+  position: absolute;
+  inset: calc(var(--u) * 1.6);
+  border-radius: calc(var(--u) * 1);
+  background:
+    radial-gradient(80% 60% at 25% 15%, rgba(255, 236, 205, 0.07), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #2a2521, #1c1916);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(0, 0, 0, 0.4);
+}
+
+/* platter, with the strobe dots around its rim */
+.tt-platter {
+  position: absolute;
+  left: calc(var(--u) * 7);
+  top: calc(var(--u) * 7);
+  width: calc(var(--u) * 66);
+  height: calc(var(--u) * 66);
+  border-radius: 9999px;
+  box-shadow: 0 calc(var(--u) * 0.8) calc(var(--u) * 1.6) rgba(0, 0, 0, 0.6);
+}
+.tt-platter-rotor {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  transform: rotate(var(--angle, 0deg));
+  background:
+    radial-gradient(circle, #151312 0 93.6%, transparent 94%),
+    repeating-conic-gradient(#c9c2b6 0 1.4deg, #6f6a62 1.4deg 4.2deg),
+    #8a847a;
+}
+.tt-platter-rotor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: conic-gradient(from 200deg, rgba(255, 255, 255, 0.25), transparent 25%, rgba(0, 0, 0, 0.35) 50%, transparent 75%, rgba(255, 255, 255, 0.25));
+  mask: radial-gradient(circle, transparent 93.8%, #000 94.2%);
+  -webkit-mask: radial-gradient(circle, transparent 93.8%, #000 94.2%);
+}
+.tt-spindle {
+  position: absolute;
+  left: calc(var(--u) * 39.4);
+  top: calc(var(--u) * 39.4);
+  width: calc(var(--u) * 1.2);
+  height: calc(var(--u) * 1.2);
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #f3ede2, #8d877d 60%, #4a4640);
+  z-index: 2;
+}
+
+/* the record */
+.tt-disc {
+  position: absolute;
+  left: calc(var(--u) * 9);
+  top: calc(var(--u) * 9);
+  width: calc(var(--u) * 62);
+  height: calc(var(--u) * 62);
+  z-index: 3;
+  border-radius: 9999px;
+  transition:
+    transform 0.95s var(--ease-settle),
+    box-shadow 0.95s var(--ease-settle);
+  box-shadow: 0 calc(var(--u) * 0.3) calc(var(--u) * 0.6) rgba(0, 0, 0, 0.55);
+}
+.tt[data-stage="arriving"] .tt-disc,
+.tt[data-stage="drawing"] .tt-disc {
+  box-shadow: 0 calc(var(--u) * 2.4) calc(var(--u) * 5) rgba(0, 0, 0, 0.6);
+}
+
+/* the sleeve it came out of */
+.tt-sleeve {
+  position: absolute;
+  left: calc(var(--u) * 8);
+  top: calc(var(--u) * 8);
+  width: calc(var(--u) * 64);
+  height: calc(var(--u) * 64);
+  z-index: 4;
+  transition:
+    transform 0.95s var(--ease-settle),
+    opacity 0.7s ease;
+  pointer-events: none;
+}
+.tt-sleeve-inner {
+  animation: sleeve-arrive 0.8s var(--ease-settle) both;
+  box-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 5) rgba(0, 0, 0, 0.55);
+}
+@keyframes sleeve-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--u) * 10)) scale(0.96);
+  }
+}
+
+/* Phones & tablets: the sleeve is lifted upward and the record slides out of its open end */
+.tt[data-stage="drawing"] .tt-sleeve {
+  transform: translateY(calc(var(--u) * -40));
+}
+.tt[data-stage="drawing"] .tt-disc {
+  transform: translateY(calc(var(--u) * -20)) scale(1.02);
+}
+.tt[data-stage="placing"] .tt-sleeve,
+.tt[data-stage="cued"] .tt-sleeve {
+  transform: translateY(calc(var(--u) * -90)) rotate(-4deg);
+  opacity: 0;
+}
+
+/* Desktop: the sleeve is held beside the deck; the record slides out sideways */
+@media (min-width: 1024px) {
+  .tt[data-stage="arriving"] .tt-sleeve {
+    transform: translateX(calc(var(--u) * -36)) rotate(-1.5deg);
+  }
+  .tt[data-stage="arriving"] .tt-disc {
+    transform: translateX(calc(var(--u) * -36)) scale(1.02);
+  }
+  .tt[data-stage="drawing"] .tt-sleeve {
+    transform: translateX(calc(var(--u) * -36)) rotate(-1.5deg);
+  }
+  .tt[data-stage="drawing"] .tt-disc {
+    transform: translateX(calc(var(--u) * -9)) translateY(calc(var(--u) * -1.5)) scale(1.02);
+  }
+  .tt[data-stage="placing"] .tt-sleeve,
+  .tt[data-stage="cued"] .tt-sleeve {
+    transform: translateX(calc(var(--u) * -66)) translateY(calc(var(--u) * 10)) rotate(-9deg);
+    opacity: 0;
+  }
+}
+
+/* power light */
+.tt-led {
+  position: absolute;
+  left: calc(var(--u) * 5);
+  bottom: calc(var(--u) * 5);
+  width: calc(var(--u) * 1.3);
+  height: calc(var(--u) * 1.3);
+  border-radius: 9999px;
+  background: #4a3a26;
+  transition:
+    background 0.6s,
+    box-shadow 0.6s;
+}
+.tt-led[data-on="true"] {
+  background: #f2b85c;
+  box-shadow:
+    0 0 calc(var(--u) * 1.2) rgba(242, 184, 92, 0.9),
+    0 0 calc(var(--u) * 4) rgba(242, 184, 92, 0.35);
+}
+
+/* tonearm */
+.tt-arm {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+}
+.tt-arm-rotor {
+  transform-box: view-box;
+  transform-origin: 84px 14px;
+  transition: transform 1s var(--ease-settle);
+}
+.tt-arm-rotor[data-tracking="true"] {
+  transition: transform 0.45s linear;
+}
+.tt-arm-shadow {
+  transition: transform 0.5s var(--ease-settle), opacity 0.5s;
+}
+.tt-arm-hit {
+  position: absolute;
+  z-index: 6;
+  left: calc(var(--u) * 72);
+  top: 0;
+  width: calc(var(--u) * 28);
+  height: calc(var(--u) * 72);
+  border-radius: calc(var(--u) * 2);
+}
+
+/* ------------------------------------------------------------------
+   Front panel: the deck's own controls
+------------------------------------------------------------------- */
+.tt-fascia {
+  width: var(--tt);
+  margin-top: calc(var(--u) * -0.8);
+  border-radius: 0 0 calc(var(--u) * 1.8) calc(var(--u) * 1.8);
+}
+.tt-key {
+  background: linear-gradient(180deg, #34302b, #1f1c19);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 2px 0 #0d0b09,
+    0 4px 8px rgba(0, 0, 0, 0.45);
+  transition:
+    transform 0.12s,
+    box-shadow 0.12s;
+}
+.tt-key:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 #0d0b09,
+    0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+/* seek groove */
+.tt-seek {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.tt-seek::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--color-amber) var(--p, 0%), rgba(239, 230, 212, 0.18) var(--p, 0%));
+}
+.tt-seek::-moz-range-track {
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--color-amber) var(--p, 0%), rgba(239, 230, 212, 0.18) var(--p, 0%));
+}
+.tt-seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
+  border-radius: 9999px;
+  background: var(--color-paper);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.tt-seek::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--color-paper);
+}
+.tt-seek:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-sleeve {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Player layout
+   Phone: deck on top, words and note below — one column, thumb-sized.
+   Desktop: deck on the left with room for the sleeve, note on the right.
+------------------------------------------------------------------- */
+.player-layout {
+  --tt: min(calc(100vw - 2rem), 30rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.75rem;
+  padding-top: 0.5rem;
+}
+.player-words {
+  width: var(--tt);
+}
+@media (min-width: 640px) {
+  .player-layout {
+    --tt: min(calc(100vw - 5rem), 34rem);
+  }
+}
+@media (min-width: 1024px) {
+  .player-layout {
+    --tt: min(42vw, 36rem, calc((100dvh - 13rem) * 1.25));
+    display: grid;
+    grid-template-columns: auto minmax(20rem, 28rem);
+    justify-content: center;
+    align-items: start;
+    column-gap: clamp(3rem, 6vw, 6.5rem);
+    padding-top: 2vh;
+  }
+  .player-deck {
+    padding-left: calc(var(--tt) * 0.12);
+  }
+  .player-words {
+    width: auto;
+    padding-top: calc(var(--tt) * 0.03);
+  }
+}

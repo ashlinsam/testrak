@@ -1,0 +1,9 @@
+# The last note: unlocked after every record has been played.
+# Signatures underneath the letter come from the friend names automatically.
+
+line-1: 24 songs.
+line-2: 24 people.
+line-3: And a thousand reasons to celebrate you.
+
+greeting: Dear [His name],
+sign-off: With love, from all of us

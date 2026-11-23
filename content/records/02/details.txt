@@ -1,0 +1,11 @@
+# Record 02. Format is  key: value  (one per line). Leave a value empty if you don't have it.
+friend: Anna Linson
+song: Otha Sollaala
+artist: G.V. Prakash Kumar, Velmurugan
+
+# Optional
+sign-off: love Anna
+memory:
+spotify:
+photo-caption:
+photo-description:

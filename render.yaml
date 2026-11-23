@@ -1,0 +1,12 @@
+# Render Blueprint: a free static site.
+# In Render: New + > Blueprint, pick this repo. (Or New + > Static Site with the same settings.)
+services:
+  - type: web
+    name: 24-rotations
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: out
+    headers:
+      - path: /content/*
+        name: Cache-Control
+        value: public, max-age=86400
