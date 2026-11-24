@@ -1,7 +1,7 @@
 # Record 19. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 19
-song: 
-artist: 
+friend: Chelsia
+song: Mustafa Mustafa
+artist: Mishary bin Rashid Alafasy
 
 # Optional
 sign-off: 
