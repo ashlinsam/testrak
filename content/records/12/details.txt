@@ -1,7 +1,7 @@
 # Record 12. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 12
-song: 
-artist: 
+friend: Noah
+song: Raanjhanaa
+artist: A. R. Rahman
 
 # Optional
 sign-off: 
