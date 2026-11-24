@@ -1,7 +1,7 @@
 # Record 18. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 18
-song: 
-artist: 
+friend: Agnel
+song: Vaathi Coming
+artist: Anirudh Ravichander
 
 # Optional
 sign-off: 
