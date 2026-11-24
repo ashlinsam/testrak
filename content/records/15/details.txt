@@ -1,7 +1,7 @@
 # Record 15. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 15
-song: 
-artist: 
+friend: Erin
+song: Adada Mazhaida
+artist: Yuvan Shankar Raja
 
 # Optional
 sign-off: 
