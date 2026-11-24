@@ -1,7 +1,7 @@
 # Record 17. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 17
-song: 
-artist: 
+friend: Annam
+song: Maro Maro
+artist: A.R. Rahman
 
 # Optional
 sign-off: 
