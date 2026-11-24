@@ -1,7 +1,7 @@
 # Record 14. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 14
-song: 
-artist: 
+friend: Preeti
+song: Madurai Veeran
+artist: Unknown
 
 # Optional
 sign-off: 
