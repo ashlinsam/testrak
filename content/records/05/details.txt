@@ -1,7 +1,7 @@
 # Record 05. Format is  key: value  (one per line). Leave a value empty if you don't have it.
 friend: Anusree
-song: 
-artist: 
+song: Red Velvet
+artist: Rajesh Murugesan, Nivin Pauly
 
 # Optional
 sign-off: 
