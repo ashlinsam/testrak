@@ -1,7 +1,7 @@
 # Record 11. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 11
-song: 
-artist: 
+friend: Arzuh
+song: Count on Me
+artist: Bruno Mars
 
 # Optional
 sign-off: 
