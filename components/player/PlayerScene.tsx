@@ -12,6 +12,7 @@ import { LinerNote } from "@/components/notes/LinerNote";
 import { ARM, Turntable, type Stage } from "./Turntable";
 import { DeckControls } from "./DeckControls";
 import { SpotifyDeck } from "./SpotifyDeck";
+import { Sleeve } from "@/components/ui/Sleeve";
 
 type Props = {
   record: RecordEntry;
@@ -223,6 +224,10 @@ export function PlayerScene({ record, total, onClose, onPrev, onNext }: Props) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: reduced ? 0 : 1.3, ease: [0.22, 1, 0.36, 1] }}
           >
+                       {/* phones: a small copy of the sleeve next to the title */}
+            <div className="float-right mt-1 ml-4 w-24 -rotate-2 shadow-[0_10px_20px_-8px_rgba(0,0,0,.7)] sm:w-28 lg:hidden" aria-hidden>
+              <Sleeve record={record} />
+            </div>
             <p className="text-[0.95rem] text-mist">
               Chosen for you by
               <span className={`${id.hand} ml-2 inline-block -rotate-2 text-[length:calc(1.9rem*var(--hand,1))] leading-none text-amber-soft`}>{record.friendName}</span>
