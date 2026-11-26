@@ -318,3 +318,24 @@
     padding-top: calc(var(--tt) * 0.03);
   }
 }
+
+
+
+/* ------------------------------------------------------------------
+   Laptops: the sleeve stays out, leaning beside the deck, while the
+   record plays. (Phones show a small cover next to the song title.)
+------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  .player-layout {
+    --tt: min(36vw, 34rem, calc((100dvh - 13rem) * 1.25));
+  }
+  .player-deck {
+    padding-left: calc(var(--tt) * 0.5);
+  }
+  .tt[data-stage="placing"] .tt-sleeve,
+  .tt[data-stage="cued"] .tt-sleeve {
+    transform-origin: top left;
+    transform: translate(calc(var(--u) * -54), calc(var(--u) * 14)) rotate(-4deg) scale(0.68);
+    opacity: 1;
+  }
+}
