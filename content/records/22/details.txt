@@ -1,7 +1,7 @@
 # Record 22. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 22
-song: 
-artist: 
+friend: Kat
+song: light
+artist: wave to earth
 
 # Optional
 sign-off: 
