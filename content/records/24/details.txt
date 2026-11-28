@@ -1,7 +1,7 @@
 # Record 24. Format is  key: value  (one per line). Leave a value empty if you don't have it.
-friend: Friend 24
-song: 
-artist: 
+friend: Ajay
+song: En Frienda Pola Yaaru Machan
+artist: Unknown
 
 # Optional
 sign-off: 
